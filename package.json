@@ -3,6 +3,7 @@
 	"version": "2.0.0",
 	"main": "index.js",
 	"scripts": {
+		"format": "prettier -w .",
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},
 	"dependencies": {
@@ -10,5 +11,6 @@
 	},
 	"devDependencies": {
 		"@companion-module/tools": "^0.5.1"
-	}
+	},
+	"prettier": "@companion-module/tools/.prettierrc.json"
 }
