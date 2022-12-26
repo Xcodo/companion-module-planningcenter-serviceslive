@@ -1,26 +1,14 @@
 {
 	"name": "planningcenter-serviceslive",
-	"version": "1.0.7",
-	"api_version": "1.0.0",
-	"keywords": [
-		"Show Control"
-	],
-	"manufacturer": "Planning Center Online",
-	"product": "Services Live",
-	"shortname": "services-live",
-	"description": "",
+	"version": "2.0.0",
 	"main": "index.js",
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},
-	"repository": {
-		"type": "git",
-		"url": "git+https://github.com/bitfocus/companion-module-planningcenter-serviceslive.git"
+	"dependencies": {
+		"@companion-module/base": "~1.0.1"
 	},
-	"author": "Joseph Adams <josephdadams@gmail.com>",
-	"license": "MIT",
-	"bugs": {
-		"url": "https://github.com/bitfocus/companion-module-planningcenter-serviceslive/issues"
-	},
-	"homepage": "https://github.com/bitfocus/companion-module-planningcenter-serviceslive#readme"
+	"devDependencies": {
+		"@companion-module/tools": "^0.5.1"
+	}
 }
