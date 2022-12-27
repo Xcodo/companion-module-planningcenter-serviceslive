@@ -1,7 +1,7 @@
 // PlanningCenterOnline-Services-Live
 
-var tcp = require('../../tcp')
-var instance_skel = require('../../instance_skel')
+//var tcp = require('../../tcp')
+var instance_skel = require('@companion-module/base')
 var Client = require('node-rest-client').Client
 var debug
 var log
@@ -14,7 +14,7 @@ function instance(system, id, config) {
 	// super-constructor
 	instance_skel.apply(this, arguments)
 
-	self.actions() // export actions
+	self.setActions(actions)
 
 	return self
 }
@@ -310,12 +310,12 @@ instance.prototype.init_presets = function () {
 	self.setPresetDefinitions(presets)
 }
 
-instance.prototype.actions = function (system) {
+var actions = function (system) {
 	var self = this
 
 	self.setActions({
 		nextitem: {
-			label: 'Go to Next Item',
+			name: 'Go to Next Item',
 			options: [
 				{
 					type: 'dropdown',
@@ -325,9 +325,10 @@ instance.prototype.actions = function (system) {
 					tooltip: 'PCO Service Plan to control.',
 				},
 			],
+			callback: doAction,
 		},
 		previousitem: {
-			label: 'Go to Previous Item',
+			name: 'Go to Previous Item',
 			options: [
 				{
 					type: 'dropdown',
@@ -337,9 +338,10 @@ instance.prototype.actions = function (system) {
 					tooltip: 'PCO Service Plan to control.',
 				},
 			],
+			callback: doAction,
 		},
 		nextitem_inservicetype: {
-			label: 'Go to Next Item of Next Plan in Selected Service Type',
+			name: 'Go to Next Item of Next Plan in Selected Service Type',
 			options: [
 				{
 					type: 'dropdown',
@@ -349,9 +351,10 @@ instance.prototype.actions = function (system) {
 					tooltip: 'PCO Service Type',
 				},
 			],
+			callback: doAction,
 		},
 		previousitem_inservicetype: {
-			label: 'Go to Previous Item of Next Plan in Selected Service Type',
+			name: 'Go to Previous Item of Next Plan in Selected Service Type',
 			options: [
 				{
 					type: 'dropdown',
@@ -361,9 +364,10 @@ instance.prototype.actions = function (system) {
 					tooltip: 'PCO Service Type',
 				},
 			],
+			callback: doAction,
 		},
 		nextitem_specific: {
-			label: 'Go to Next Item of a Specific Plan',
+			name: 'Go to Next Item of a Specific Plan',
 			options: [
 				{
 					type: 'textinput',
@@ -378,9 +382,10 @@ instance.prototype.actions = function (system) {
 					tooltip: 'PCO Plan Id.',
 				},
 			],
+			callback: doAction,
 		},
 		previousitem_specific: {
-			label: 'Go to Previous Item of a Specific Plan',
+			name: 'Go to Previous Item of a Specific Plan',
 			options: [
 				{
 					type: 'textinput',
@@ -395,9 +400,10 @@ instance.prototype.actions = function (system) {
 					tooltip: 'PCO Plan Id to control.',
 				},
 			],
+			callback: doAction,
 		},
 		takecontrol: {
-			label: 'Take Control',
+			name: 'Take Control',
 			options: [
 				{
 					type: 'dropdown',
@@ -407,9 +413,10 @@ instance.prototype.actions = function (system) {
 					tooltip: 'PCO Service Plan to control.',
 				},
 			],
+			callback: doAction,
 		},
 		releasecontrol: {
-			label: 'Release Control',
+			name: 'Release Control',
 			options: [
 				{
 					type: 'dropdown',
@@ -419,9 +426,10 @@ instance.prototype.actions = function (system) {
 					tooltip: 'PCO Service Plan to control.',
 				},
 			],
+			callback: doAction,
 		},
 		takecontrol_specific: {
-			label: 'Take Control of a Specific Plan',
+			name: 'Take Control of a Specific Plan',
 			options: [
 				{
 					type: 'textinput',
@@ -436,9 +444,10 @@ instance.prototype.actions = function (system) {
 					tooltip: 'PCO Plan Id to control.',
 				},
 			],
+			callback: doAction,
 		},
 		releasecontrol_specific: {
-			label: 'Release Control of a Specific Plan',
+			name: 'Release Control of a Specific Plan',
 			options: [
 				{
 					type: 'textinput',
@@ -453,13 +462,14 @@ instance.prototype.actions = function (system) {
 					tooltip: 'PCO Plan Id to control.',
 				},
 			],
+			callback: doAction,
 		},
 	})
 }
 
-instance.prototype.action = function (action) {
+var doAction = function (actionId) {
 	var self = this
-	var options = action.options
+	var options = actionId.options
 
 	let serviceTypeId = null
 	let planId = null
@@ -471,7 +481,7 @@ instance.prototype.action = function (action) {
 			if (planObj.serviceTypeId) {
 				serviceTypeId = planObj.serviceTypeId
 
-				switch (action.action) {
+				switch (actionId.action) {
 					case 'nextitem':
 						self
 							.takeControl(serviceTypeId, planId)
@@ -570,7 +580,7 @@ instance.prototype.action = function (action) {
 	} else {
 		//they didn't choose a specific plan
 
-		switch (action.action) {
+		switch (actionId.action) {
 			case 'nextitem_inservicetype':
 				//get the next plan id in the service type, then do the normal requests (take control, advance)
 				serviceTypeId = options.servicetypeid
