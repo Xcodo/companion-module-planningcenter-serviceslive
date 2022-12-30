@@ -1,22 +1,13 @@
 // PlanningCenterOnline-Services-Live
 
-//var tcp = require('../../tcp')
-var instance_skel = require('@companion-module/base')
+const { InstanceBase, Regex, runEntrypoint } = require('@companion-module/base')
 var Client = require('node-rest-client').Client
-var debug
-var log
 
-var baseAPIUrl = 'https://api.planningcenteronline.com/services/v2'
+const baseAPIUrl = 'https://api.planningcenteronline.com/services/v2'
 
-function instance(system, id, config) {
+function instance(internal) {
 	var self = this
-
-	// super-constructor
-	instance_skel.apply(this, arguments)
-
-	self.setActions(actions)
-
-	return self
+	super(internal)
 }
 
 instance.prototype.currentState = {
@@ -25,26 +16,23 @@ instance.prototype.currentState = {
 	dynamicVariableDefinitions: {},
 }
 
-instance.prototype.init = function () {
+instance.prototype.init = async function (config) {
 	var self = this
+	
+	self.actions();
 
-	debug = self.debug
-	log = self.log
+	self.updateStatus('ok')
 
-	self.status(self.STATUS_OK)
-
-	self.initFeedbacks()
 	self.initVariables()
 	self.init_pcoserviceslive()
 }
 
-instance.prototype.updateConfig = function (config) {
+instance.prototype.configUpdated = async function (config) {
 	var self = this
 	self.config = config
 
-	self.status(self.STATUS_OK)
+	self.updateStatus('ok')
 
-	self.initFeedbacks()
 	self.initVariables()
 	self.init_pcoserviceslive()
 }
@@ -91,7 +79,7 @@ instance.prototype.init_pcoserviceslive = function () {
 				console.log('****services url****')
 				console.log(services_url)
 				self.log('error', 'Error getting Services data: ' + message)
-				self.status(self.STATUS_ERROR, message)
+				self.updateStatus('unknown_error' , message)
 			})
 	}
 }
@@ -123,7 +111,7 @@ instance.prototype.processServicesData = function (result) {
 			})
 			.catch(function (message) {
 				self.log('error', 'Error processing Services data: ' + message)
-				self.status(self.STATUS_ERROR, message)
+				self.updateStatus('unknown_error' , message)
 			})
 	}
 }
@@ -131,7 +119,7 @@ instance.prototype.processServicesData = function (result) {
 instance.prototype.processPlansData = function (result) {
 	var self = this
 
-	self.status(self.STATUS_OK)
+	self.updateStatus('ok')
 	let services = self.currentState.internal.services
 
 	for (let j = 0; j < result.length; j++) {
@@ -149,7 +137,7 @@ instance.prototype.processPlansData = function (result) {
 }
 
 // Return config fields for web config
-instance.prototype.config_fields = function () {
+instance.prototype.getConfigFields = function () {
 	var self = this
 
 	return [
@@ -192,25 +180,16 @@ instance.prototype.config_fields = function () {
 			label: 'The number of plans to return per service type. Default is 7.',
 			width: 3,
 			default: '7',
-			regex: self.REGEX_NUMBER,
+			regex: Regex.NUMBER,
 		},
 	]
 }
 
 // When module gets deleted
-instance.prototype.destroy = function () {
+instance.prototype.destroy = async function () {
 	var self = this
 
-	debug('destroy', self.id)
-}
-
-// Set up Feedbacks
-instance.prototype.initFeedbacks = function () {
-	var self = this
-
-	var feedbacks = {}
-
-	//self.setFeedbackDefinitions(feedbacks);
+	self.log('debug', 'destroy')
 }
 
 // Set up available variables
@@ -308,7 +287,7 @@ instance.prototype.init_presets = function () {
 var actions = function (system) {
 	var self = this
 
-	self.setActions({
+	self.setActionDefinitions({
 		nextitem: {
 			name: 'Go to Next Item',
 			options: [
@@ -481,92 +460,92 @@ var doAction = function (actionId) {
 						self
 							.takeControl(serviceTypeId, planId)
 							.then(function (result) {
-								self.status(self.STATUS_OK)
+								self.updateStatus('ok')
 								self.controlLive(serviceTypeId, planId, 'next')
 							})
 							.catch(function (message) {
 								self.log('error', message)
-								self.status(self.STATUS_ERROR, message)
+								self.updateStatus('unknown_error' , message)
 							})
 						break
 					case 'previousitem':
 						self
 							.takeControl(serviceTypeId, planId)
 							.then(function (result) {
-								self.status(self.STATUS_OK)
+								self.updateStatus('ok')
 								self.controlLive(serviceTypeId, planId, 'previous')
 							})
 							.catch(function (message) {
 								self.log('error', message)
-								self.status(self.STATUS_ERROR, message)
+								self.updateStatus('unknown_error' , message)
 							})
 						break
 					case 'nextitem_specific':
 						self
 							.takeControl(options.servicetypeid, planId)
 							.then(function (result) {
-								self.status(self.STATUS_OK)
+								self.updateStatus('ok')
 								self.controlLive(options.servicetypeid, planId, 'next')
 							})
 							.catch(function (message) {
 								self.log('error', message)
-								self.status(self.STATUS_ERROR, message)
+								self.updateStatus('unknown_error' , message)
 							})
 						break
 					case 'previousitem_specific':
 						self
 							.takeControl(options.servicetypeid, planId)
 							.then(function (result) {
-								self.status(self.STATUS_OK)
+								self.updateStatus('ok')
 								self.controlLive(options.servicetypeid, planId, 'previous')
 							})
 							.catch(function (message) {
 								self.log('error', message)
-								self.status(self.STATUS_ERROR, message)
+								self.updateStatus('unknown_error' , message)
 							})
 						break
 					case 'takecontrol':
 						self
 							.takeControl(serviceTypeId, planId)
 							.then(function (result) {
-								self.status(self.STATUS_OK)
+								self.updateStatus('ok')
 							})
 							.catch(function (message) {
 								self.log('error', message)
-								self.status(self.STATUS_ERROR, message)
+								self.updateStatus('unknown_error' , message)
 							})
 						break
 					case 'releasecontrol':
 						self
 							.releaseControl(serviceTypeId, planId)
 							.then(function (result) {
-								self.status(self.STATUS_OK)
+								self.updateStatus('ok')
 							})
 							.catch(function (message) {
 								self.log('error', message)
-								self.status(self.STATUS_ERROR, message)
+								self.updateStatus('unknown_error' , message)
 							})
 						break
 					case 'takecontrol_specific':
 						self
 							.takeControl(options.servicetypeid, planId)
 							.then(function (result) {
-								self.status(self.STATUS_OK)
+								self.updateStatus('ok')
 							})
 							.catch(function (message) {
 								self.log('error', message)
-								self.status(self.STATUS_ERROR, message)
+								self.updateStatus('unknown_error' , message)
 							})
 						break
 					case 'releasecontrol_specific':
 						self
 							.releaseControl(options.servicetypeid, planId)
 							.then(function (result) {
-								self.status(self.STATUS_OK)
+								self.updateStatus('ok')
 							})
 							.catch(function (message) {
 								self.log('error', message)
-								self.status(self.STATUS_ERROR, message)
+								self.updateStatus('unknown_error' , message)
 							})
 						break
 				}
@@ -585,17 +564,17 @@ var doAction = function (actionId) {
 						self
 							.takeControl(serviceTypeId, planId)
 							.then(function (result) {
-								self.status(self.STATUS_OK)
+								self.updateStatus('ok')
 								self.controlLive(serviceTypeId, planId, 'next')
 							})
 							.catch(function (message) {
 								self.log('error', message)
-								self.status(self.STATUS_ERROR, message)
+								self.updateStatus('unknown_error' , message)
 							})
 					})
 					.catch(function (message) {
 						self.log('error', message)
-						self.status(self.STATUS_ERROR, message)
+						self.updateStatus('unknown_error' , message)
 					})
 				break
 			case 'previousitem_inservicetype':
@@ -606,17 +585,17 @@ var doAction = function (actionId) {
 						self
 							.takeControl(serviceTypeId, planId)
 							.then(function (result) {
-								self.status(self.STATUS_OK)
+								self.updateStatus('ok')
 								self.controlLive(serviceTypeId, planId, 'previous')
 							})
 							.catch(function (message) {
 								self.log('error', message)
-								self.status(self.STATUS_ERROR, message)
+								self.updateStatus('unknown_error' , message)
 							})
 					})
 					.catch(function (message) {
 						self.log('error', message)
-						self.status(self.STATUS_ERROR, message)
+						self.updateStatus('unknown_error' , message)
 					})
 				break
 		}
@@ -723,7 +702,7 @@ instance.prototype.takeControl = function (serviceTypeId, planId) {
 						})
 						.catch(function (message) {
 							self.log('error', message)
-							self.status(self.STATUS_ERROR, message)
+							self.updateStatus('unknown_error' , message)
 						})
 				} else {
 					//someone is in control, so let's check to see who it is
@@ -745,19 +724,19 @@ instance.prototype.takeControl = function (serviceTypeId, planId) {
 									})
 									.catch(function (message) {
 										self.log('error', message)
-										self.status(self.STATUS_ERROR, message)
+										self.updateStatus('unknown_error' , message)
 									})
 							})
 							.catch(function (message) {
 								self.log('error', message)
-								self.status(self.STATUS_ERROR, message)
+								self.updateStatus('unknown_error' , message)
 							})
 					}
 				}
 			})
 			.catch(function (message) {
 				self.log('error', 'Error Taking Control of Plan: ' + message)
-				self.status(self.STATUS_ERROR, message)
+				self.updateStatus('unknown_error' , message)
 			})
 	})
 }
@@ -782,13 +761,13 @@ instance.prototype.releaseControl = function (serviceTypeId, planId) {
 						})
 						.catch(function (message) {
 							self.log('error', message)
-							self.status(self.STATUS_ERROR, message)
+							self.updateStatus('unknown_error' , message)
 						})
 				}
 			})
 			.catch(function (message) {
 				self.log('error', 'Error Releasing Control of Plan: ' + message)
-				self.status(self.STATUS_ERROR, message)
+				self.updateStatus('unknown_error' , message)
 			})
 	})
 }
@@ -817,7 +796,7 @@ instance.prototype.controlLive = function (serviceTypeId, planId, direction) {
 		})
 		.catch(function (message) {
 			self.log('error', 'Error Controlling LIVE: ' + message)
-			self.status(self.STATUS_ERROR, message)
+			self.updateStatus('unknown_error' , message)
 		})
 }
 
@@ -826,7 +805,7 @@ instance.prototype.processLiveData = function (result) {
 
 	if (result.errors) {
 		self.log('error', result.errors)
-		self.status(self.STATUS_ERROR, result.errors)
+		self.updateStatus('unknown_error' , result.errors)
 	} else {
 		let items = result.included
 
@@ -870,10 +849,10 @@ instance.prototype.getPlanIdOfServiceType = function (serviceTypeId) {
 			})
 			.catch(function (message) {
 				self.log('error', message)
-				self.status(self.STATUS_ERROR, message)
+				self.updateStatus('unknown_error' , message)
 			})
 	})
 }
 
-instance_skel.extendedBy(instance)
-exports = module.exports = instance
+InstanceBase.extendedBy(instance)
+runEntrypoint(instance, [])
