@@ -7,7 +7,9 @@ const baseAPIUrl = 'https://api.planningcenteronline.com/services/v2'
 
 function instance(internal) {
 	var self = this
-	super(internal)
+
+	// super-constructor
+	InstanceBase.apply(this, internal)
 }
 
 instance.prototype.currentState = {
@@ -18,8 +20,8 @@ instance.prototype.currentState = {
 
 instance.prototype.init = async function (config) {
 	var self = this
-	
-	self.actions();
+
+	self.actions()
 
 	self.updateStatus('ok')
 
@@ -79,7 +81,7 @@ instance.prototype.init_pcoserviceslive = function () {
 				console.log('****services url****')
 				console.log(services_url)
 				self.log('error', 'Error getting Services data: ' + message)
-				self.updateStatus('unknown_error' , message)
+				self.updateStatus('unknown_error', message)
 			})
 	}
 }
@@ -111,7 +113,7 @@ instance.prototype.processServicesData = function (result) {
 			})
 			.catch(function (message) {
 				self.log('error', 'Error processing Services data: ' + message)
-				self.updateStatus('unknown_error' , message)
+				self.updateStatus('unknown_error', message)
 			})
 	}
 }
@@ -465,7 +467,7 @@ var doAction = function (actionId) {
 							})
 							.catch(function (message) {
 								self.log('error', message)
-								self.updateStatus('unknown_error' , message)
+								self.updateStatus('unknown_error', message)
 							})
 						break
 					case 'previousitem':
@@ -477,7 +479,7 @@ var doAction = function (actionId) {
 							})
 							.catch(function (message) {
 								self.log('error', message)
-								self.updateStatus('unknown_error' , message)
+								self.updateStatus('unknown_error', message)
 							})
 						break
 					case 'nextitem_specific':
@@ -489,7 +491,7 @@ var doAction = function (actionId) {
 							})
 							.catch(function (message) {
 								self.log('error', message)
-								self.updateStatus('unknown_error' , message)
+								self.updateStatus('unknown_error', message)
 							})
 						break
 					case 'previousitem_specific':
@@ -501,7 +503,7 @@ var doAction = function (actionId) {
 							})
 							.catch(function (message) {
 								self.log('error', message)
-								self.updateStatus('unknown_error' , message)
+								self.updateStatus('unknown_error', message)
 							})
 						break
 					case 'takecontrol':
@@ -512,7 +514,7 @@ var doAction = function (actionId) {
 							})
 							.catch(function (message) {
 								self.log('error', message)
-								self.updateStatus('unknown_error' , message)
+								self.updateStatus('unknown_error', message)
 							})
 						break
 					case 'releasecontrol':
@@ -523,7 +525,7 @@ var doAction = function (actionId) {
 							})
 							.catch(function (message) {
 								self.log('error', message)
-								self.updateStatus('unknown_error' , message)
+								self.updateStatus('unknown_error', message)
 							})
 						break
 					case 'takecontrol_specific':
@@ -534,7 +536,7 @@ var doAction = function (actionId) {
 							})
 							.catch(function (message) {
 								self.log('error', message)
-								self.updateStatus('unknown_error' , message)
+								self.updateStatus('unknown_error', message)
 							})
 						break
 					case 'releasecontrol_specific':
@@ -545,7 +547,7 @@ var doAction = function (actionId) {
 							})
 							.catch(function (message) {
 								self.log('error', message)
-								self.updateStatus('unknown_error' , message)
+								self.updateStatus('unknown_error', message)
 							})
 						break
 				}
@@ -569,12 +571,12 @@ var doAction = function (actionId) {
 							})
 							.catch(function (message) {
 								self.log('error', message)
-								self.updateStatus('unknown_error' , message)
+								self.updateStatus('unknown_error', message)
 							})
 					})
 					.catch(function (message) {
 						self.log('error', message)
-						self.updateStatus('unknown_error' , message)
+						self.updateStatus('unknown_error', message)
 					})
 				break
 			case 'previousitem_inservicetype':
@@ -590,12 +592,12 @@ var doAction = function (actionId) {
 							})
 							.catch(function (message) {
 								self.log('error', message)
-								self.updateStatus('unknown_error' , message)
+								self.updateStatus('unknown_error', message)
 							})
 					})
 					.catch(function (message) {
 						self.log('error', message)
-						self.updateStatus('unknown_error' , message)
+						self.updateStatus('unknown_error', message)
 					})
 				break
 		}
@@ -702,7 +704,7 @@ instance.prototype.takeControl = function (serviceTypeId, planId) {
 						})
 						.catch(function (message) {
 							self.log('error', message)
-							self.updateStatus('unknown_error' , message)
+							self.updateStatus('unknown_error', message)
 						})
 				} else {
 					//someone is in control, so let's check to see who it is
@@ -724,19 +726,19 @@ instance.prototype.takeControl = function (serviceTypeId, planId) {
 									})
 									.catch(function (message) {
 										self.log('error', message)
-										self.updateStatus('unknown_error' , message)
+										self.updateStatus('unknown_error', message)
 									})
 							})
 							.catch(function (message) {
 								self.log('error', message)
-								self.updateStatus('unknown_error' , message)
+								self.updateStatus('unknown_error', message)
 							})
 					}
 				}
 			})
 			.catch(function (message) {
 				self.log('error', 'Error Taking Control of Plan: ' + message)
-				self.updateStatus('unknown_error' , message)
+				self.updateStatus('unknown_error', message)
 			})
 	})
 }
@@ -761,13 +763,13 @@ instance.prototype.releaseControl = function (serviceTypeId, planId) {
 						})
 						.catch(function (message) {
 							self.log('error', message)
-							self.updateStatus('unknown_error' , message)
+							self.updateStatus('unknown_error', message)
 						})
 				}
 			})
 			.catch(function (message) {
 				self.log('error', 'Error Releasing Control of Plan: ' + message)
-				self.updateStatus('unknown_error' , message)
+				self.updateStatus('unknown_error', message)
 			})
 	})
 }
@@ -796,7 +798,7 @@ instance.prototype.controlLive = function (serviceTypeId, planId, direction) {
 		})
 		.catch(function (message) {
 			self.log('error', 'Error Controlling LIVE: ' + message)
-			self.updateStatus('unknown_error' , message)
+			self.updateStatus('unknown_error', message)
 		})
 }
 
@@ -805,7 +807,7 @@ instance.prototype.processLiveData = function (result) {
 
 	if (result.errors) {
 		self.log('error', result.errors)
-		self.updateStatus('unknown_error' , result.errors)
+		self.updateStatus('unknown_error', result.errors)
 	} else {
 		let items = result.included
 
@@ -849,7 +851,7 @@ instance.prototype.getPlanIdOfServiceType = function (serviceTypeId) {
 			})
 			.catch(function (message) {
 				self.log('error', message)
-				self.updateStatus('unknown_error' , message)
+				self.updateStatus('unknown_error', message)
 			})
 	})
 }
