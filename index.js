@@ -154,7 +154,7 @@ instance.prototype.config_fields = function () {
 
 	return [
 		{
-			type: 'text',
+			type: 'static-text',
 			id: 'info',
 			width: 12,
 			label: 'Information',
@@ -219,20 +219,20 @@ instance.prototype.initVariables = function () {
 
 	var variables = [
 		{
-			label: 'Plan Index',
-			name: 'plan_index',
+			name: 'Plan Index',
+			variableId: 'plan_index',
 		},
 		{
-			label: 'Plan Length',
-			name: 'plan_length',
+			name: 'Plan Length',
+			variableId: 'plan_length',
 		},
 		{
-			label: 'Plan Current Item',
-			name: 'plan_currentitem',
+			name: 'Plan Current Item',
+			variableId: 'plan_currentitem',
 		},
 		{
-			label: 'Plan Next Item',
-			name: 'plan_nextitem',
+			name: 'Plan Next Item',
+			variableId: 'plan_nextitem',
 		},
 	]
 
@@ -243,20 +243,19 @@ instance.prototype.initVariables = function () {
 }
 
 /**
- * Updates the dynamic variable and records the internal state of that variable.
+ * Updates the dynamic variable value but does not set it in Companion.
  *
  * Will log a warning if the variable doesn't exist.
  */
-instance.prototype.updateVariable = function (name, value) {
+instance.prototype.updateVariableValue = function (variableId, value) {
 	var self = this
 
-	if (self.currentState.dynamicVariables[name] === undefined) {
-		self.log('warn', 'Variable ' + name + 'does not exist')
+	if (self.currentState.dynamicVariables[variableId] === undefined) {
+		self.log('warn', 'Variable ' + variableId + 'does not exist')
 		//return;
 	}
 
-	self.currentState.dynamicVariables[name] = value
-	self.setVariable(name, value)
+	self.currentState.dynamicVariables[variableId] = value
 }
 
 /**
@@ -265,9 +264,7 @@ instance.prototype.updateVariable = function (name, value) {
 instance.prototype.updateAllVariables = function () {
 	var self = this
 
-	Object.keys(self.currentState.dynamicVariables).forEach(function (key) {
-		self.updateVariable(key, self.currentState.dynamicVariables[key])
-	})
+	this.setVariableValues(self.currentState.dynamicVariables)
 }
 
 /**
@@ -297,10 +294,8 @@ instance.prototype.emptyCurrentState = function () {
 		plan_nextitem: '',
 	}
 
-	// Update Companion with the default state of each dynamic variable.
-	Object.keys(self.currentState.dynamicVariables).forEach(function (key) {
-		self.updateVariable(key, self.currentState.dynamicVariables[key])
-	})
+	// Update Companion with the default state of the variables.
+	self.updateAllVariables()
 }
 
 instance.prototype.init_presets = function () {
@@ -848,14 +843,16 @@ instance.prototype.processLiveData = function (result) {
 			let index = items.findIndex((i) => i.id === currentItemId)
 			let item = items.find((i) => i.id === currentItemId)
 
-			self.updateVariable('plan_index', index)
-			self.updateVariable('plan_length', items.length)
-			self.updateVariable('plan_currentitem', item.attributes.title)
+			self.updateVariableValue('plan_index', index)
+			self.updateVariableValue('plan_length', items.length)
+			self.updateVariableValue('plan_currentitem', item.attributes.title)
 
 			if (index < items.length) {
 				let nextitem = items[index + 1]
-				self.updateVariable('plan_nextitem', nextitem.attributes.title)
+				self.updateVariableValue('plan_nextitem', nextitem.attributes.title)
 			}
+
+			self.updateAllVariables()
 		}
 	}
 }
